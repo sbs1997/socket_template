@@ -27,7 +27,7 @@ app.secret_key = b'\xcd\x9f.\xe9n\x18\x1c\x8f\xeby\xbf#\xaf\xa8z{'
 class GetTokens(Resource):
     def get(self):
         print("Session: ", session)
-        tokens = Token.query.outerjoin(GameUser,Token.token_owner == GameUser.id).outerjoin(Game, GameUser.game_id==Game.id).filter(Game.code == 124).all()
+        tokens = Token.query.outerjoin(GameUser,Token.token_owner == GameUser.id).outerjoin(Game, GameUser.game_id==Game.id).filter(Game.code == 123).all()
         print(tokens)
         all_t = []
         for token in tokens:
@@ -76,6 +76,11 @@ def handle_to_server(arg):
 def handle_user(arg):
     print(arg)
     session["user"] = arg
+
+@socket_io.on('move-token')
+def handle_move(arg):
+    print(arg)
+    socket_io.emit('token-movement',arg, room = session["room"])
 
 @socket_io.on("disconnect")
 def disconnected():

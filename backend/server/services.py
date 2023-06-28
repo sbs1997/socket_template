@@ -13,6 +13,7 @@ metadata = MetaData(naming_convention={
     "pk": "pk_%(table_name)s"
     })
 app = Flask(__name__)
+# socket_io = SocketIO(app, cors_allowed_origins="*",manage_session=False)
 socket_io = SocketIO(app, cors_allowed_origins="*")
 bcrypt = Bcrypt(app)
 db = SQLAlchemy(metadata=metadata)

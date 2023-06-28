@@ -1,5 +1,14 @@
+import { useEffect,useState } from 'react';
 import Draggable from 'react-draggable';
-function Token({token}){
+import { Socket } from 'socket.io-client';
+function Token({token,sendMovement,updateTokens,socket}){
+    console.log(token)
+    useEffect(()=>{
+        socket.on('token-movement', (msg)=> {
+            updateTokens(msg)
+            })
+    },[])
+    
     function handleStop(event, dragElement){
         console.log(dragElement)
         fetch(`/api/tokens/${token.id}`,
@@ -14,15 +23,21 @@ function Token({token}){
             })
         })
     }
+    function handleDrag(event,dragElement){
+        const tokenDeets = {id:token.id,x:dragElement.x,y:dragElement.y}
+        updateTokens(tokenDeets)
+        sendMovement(tokenDeets)
+    }
     return(
         <Draggable
         handle=".handle"
         bounds="parent"
         defaultPosition={{x: token.x_pos, y: token.y_pos}}
-        position={null}
-        grid={[10, 10]}
+        position={{x: token.x_pos, y: token.y_pos}}
+        grid={[1, 1]}
         scale={1}
-        onStop={handleStop}>
+        onStop={handleStop}
+        onDrag={handleDrag}>
         {/* onStart={this.handleStart}
         onDrag={this.handleDrag}
         onStop={this.handleStop}> */}

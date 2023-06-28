@@ -16,18 +16,33 @@ const App = () => {
   //   .then(data=>setTokens(data))
   // },[])
   // const filtered_token = tokens.filter(token=>token.owner.game.code === currGameCode)
-  const react_token = tokens.map(token=><Token key = {token.id} token = {token}/>)
+  const react_token = tokens.map(token=><Token key = {token.id} token = {token} sendMovement={sendMovement} updateTokens={updateTokens} socket={socket}/>)
   useEffect(() => {
     socket = io('ws://localhost:5555');
     socket.on('from-ser', (msg) => {
+      console.log(serverMessage)
       setServerMessage(msg);
     });
+    // socket.on('token-movement', (msg)=> {
+    //   console.log(msg)
+    //   // const n_tokens = tokens.map(token => {
+    //   //   console.log(token)
+    //   //   if(token.id == msg.id){
+    //   //     token.x_pos = msg.x
+    //   //     token.y_pos = msg.y
+    //   //   }
+    //   //   return token
+    //   // })
+    //   // setTokens(n_tokens)
+    //   // console.log(n_tokens)
+    // })
     return () => {
       socket.off('disconnected', (msg) => {
           console.log(msg);
         });
     }
   }, []);
+  
   // socket.on('from-ser', (msg) => {
   //   setServerMessage(msg);
   // });
@@ -35,27 +50,40 @@ const App = () => {
   // socket.on('disconnected', (msg) => {
   //   console.log(msg);
   // });
-
-  const sendToServer = () => {
+  function updateTokens(new_token){
+    console.log(new_token)
+    const n_tokens = tokens.map(token => {
+          console.log(token)
+          if(token.id == new_token.id){
+            token.x_pos = new_token.x
+            token.y_pos = new_token.y
+          }
+          return token
+        })
+        setTokens(n_tokens)
+  }
+  function sendToServer(){
     console.log("Emmitting")
     socket.emit('to-server',"Hello");
   }
 
-  const sendUser = (e) => {
+  function sendUser(e){
     e.preventDefault()
     console.log(e.target.test.value)
-    // setCurrGameCode(e.target.test.value)
+    setCurrGameCode(e.target.test.value)
     socket.emit('join_room', e.target.test.value)
-    // fetch('/api/tokens')
-    // .then(r=>r.json())
-    // .then(data=>setTokens(data))
-    
+    fetch('/api/tokens')
+    .then(r=>r.json())
+    .then(data=>setTokens(data)) 
+  }
+  function sendMovement(token){
+    socket.emit('move-token',{id:token.id, x:token.x,y:token.y})
   }
   function dragStartHandler(event) {
     console.log(event.style); // undefined
     setPos({x:event.pageX,y:event.pageY})
   }
-  console.log(pos)
+  // console.log(pos)
   
   return (
     <div className="App">
