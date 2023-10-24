@@ -23,9 +23,6 @@ CORS(app)
 
 app.secret_key = b'\xcd\x9f.\xe9n\x18\x1c\x8f\xeby\xbf#\xaf\xa8z{'
 
-def handle_message(user, message):
-    print(f"{user}: {message}")
-    pass
     
 
 
@@ -35,22 +32,15 @@ def handle_connect():
     # print(request.sid)
     # session["user"] = request.sid
 
-@socket_io.on('chat_message')
+@socket_io.on('client-message')
 def chat_message(name, message):
-    handle_message(name, message)
+    print(message)
+    socket_io.emit('server-message', {
+        'sender': name,
+        'message': message
+        })
     
-@socket_io.on('pinging')
-def pinger():
-    print("we've been pinged!")
 
-@socket_io.on('ping_pong')
-def ping_pong():
-    socket_io.emit('from-ser', 'pong')
-
-@socket_io.on('send-color')
-def color_send(color):
-    print(color)
-    socket_io.emit('new-color', color)
 
 # @socket_io.on('join_room')
 # def handle_connect(room_code):
