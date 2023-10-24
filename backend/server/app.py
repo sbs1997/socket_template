@@ -3,7 +3,7 @@ from flask_migrate import Migrate
 from flask_restful import Api, Resource
 from flask_cors import CORS
 from time import time
-from models import User,Token,GameUser,Game
+# from models import User
 from flask_socketio import join_room, leave_room
 # from sqlalchemy import extract
 from flask_bcrypt import Bcrypt
@@ -23,36 +23,11 @@ CORS(app)
 
 app.secret_key = b'\xcd\x9f.\xe9n\x18\x1c\x8f\xeby\xbf#\xaf\xa8z{'
 
+def handle_message(user, message):
+    print(f"{user}: {message}")
+    pass
+    
 
-class GetTokens(Resource):
-    def get(self):
-        print("Session: ", session)
-        tokens = Token.query.outerjoin(GameUser,Token.token_owner == GameUser.id).outerjoin(Game, GameUser.game_id==Game.id).filter(Game.code == 123).all()
-        print(tokens)
-        all_t = []
-        for token in tokens:
-            all_t.append(token.to_dict())
-        return make_response(all_t,200)
-
-api.add_resource(GetTokens, '/tokens')
-
-class TokenHandler(Resource):
-    def get(self,id):
-        token = Token.query.filter(Token.id == id).first()
-        return make_response(token.to_dict(),200)
-    def patch(self,id):
-        print("OOPs")
-        print(request)
-        token = Token.query.filter(Token.id == id).first()
-        for attr in request.get_json():
-            setattr(token, attr, request.get_json()[attr])
-        db.session.add(token)
-        db.session.commit()
-        return make_response(token.to_dict(),200)
-
-
-
-api.add_resource(TokenHandler, '/tokens/<int:id>')
 
 @socket_io.on('connect')
 def handle_connect():
@@ -60,27 +35,44 @@ def handle_connect():
     # print(request.sid)
     # session["user"] = request.sid
 
-@socket_io.on('join_room')
-def handle_connect(room_code):
-    print(f'Joining {room_code}')
-    session["room"] = room_code
-    join_room(room_code)
+@socket_io.on('chat_message')
+def chat_message(name, message):
+    handle_message(name, message)
+    
+@socket_io.on('pinging')
+def pinger():
+    print("we've been pinged!")
 
-@socket_io.on('to-server')
-def handle_to_server(arg):
-    print(session)
-    print(f'new to-server event: {arg}')
-    socket_io.emit('from-ser', str(time()), room=session["room"])
+@socket_io.on('ping_pong')
+def ping_pong():
+    socket_io.emit('from-ser', 'pong')
 
-@socket_io.on('to-login')
-def handle_user(arg):
-    print(arg)
-    session["user"] = arg
+@socket_io.on('send-color')
+def color_send(color):
+    print(color)
+    socket_io.emit('new-color', color)
 
-@socket_io.on('move-token')
-def handle_move(arg):
-    print(arg)
-    socket_io.emit('token-movement',arg, room = session["room"])
+# @socket_io.on('join_room')
+# def handle_connect(room_code):
+#     print(f'Joining {room_code}')
+#     session["room"] = room_code
+#     join_room(room_code)
+
+# @socket_io.on('to-server')
+# def handle_to_server(arg):
+#     print(session)
+#     print(f'new to-server event: {arg}')
+#     socket_io.emit('from-ser', str(time()), room=session["room"])
+
+# @socket_io.on('to-login')
+# def handle_user(arg):
+#     print(arg)
+#     session["user"] = arg
+
+# @socket_io.on('move-token')
+# def handle_move(arg):
+#     print(arg)
+#     socket_io.emit('token-movement',arg, room = session["room"])
 
 @socket_io.on("disconnect")
 def disconnected():
