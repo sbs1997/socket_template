@@ -1,8 +1,11 @@
 import React from 'react'
 
-function Message({message}) {
+function Message({message, user}) {
   return (
-    <p>{message.sender}: {message.message}</p>
+    <div className='message'>
+        <p className={message.sender == user ? "my-message" : "their-message"}>{message.sender}: {" "}</p>
+        <p>{message.message}</p>
+    </div>
   )
 }
 

@@ -5,10 +5,13 @@ import Message from './Message'
 function ChatBox({messages, user}) {
     
   return (
-    <div>
-        <h1>{user}</h1>
-        {messages.map((message)=>{
-            return <Message key={messages.indexOf(message)} message={message}/>
+    <div className="chat-box">
+        {messages.toReversed().map((message)=>{
+            return <Message 
+                key={messages.indexOf(message)} 
+                message={message}
+                user={user}
+            />
         })}
     </div>
   )

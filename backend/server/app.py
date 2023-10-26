@@ -33,12 +33,21 @@ def handle_connect():
     # session["user"] = request.sid
 
 @socket_io.on('client-message')
-def chat_message(name, message):
-    print(message)
+def chat_message(name, message, roomNum):
+    # print(message)
     socket_io.emit('server-message', {
         'sender': name,
         'message': message
-        })
+        }, room = roomNum)
+    
+@socket_io.on('room-change')
+def change_room(room):
+    if room == "1":
+        leave_room("2")
+        join_room(room)
+    else:
+        leave_room("1")
+        join_room(room)
     
 
 
